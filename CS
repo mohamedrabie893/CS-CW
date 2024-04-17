@@ -1,18 +1,72 @@
-def extended_gcd(p,q):
+import random
+
+message = int(input("Enter a message: "))
+
+def extended_gcd(a,b):
     X0,X1,Y0,Y1=1,0,0,1
-    while q:
-        q,p,q= p//q,q,p%q 
+    while b:
+        q,a,b= a//b,b,a%b 
         X0,X1=X1,X0 - q *X1
         Y0,Y1=Y1,Y0 - q *Y1
-    return p,X0,Y0
+    return a,X0,Y0
 
-def get_positive_private_exponent(e,phi_n):
-    gcd,x,y=extended_gcd(e,phi_n)
-    private_exponent= x%phi_n
+def get_positive_private_exponent(e,phi):
+    gcd,x,y=extended_gcd(e,phi)
+    private_exponent= x%phi
     return private_exponent 
-e=18
-phi_n=41
-gcd,x,y= extended_gcd(e,phi_n)
-private_exponent= get_positive_private_exponent(e,phi_n)
-print(f"The private exponent (d) is: {private_exponent}")
 
+def check_prime(num):
+    if num <=1:
+        print("The Entered Value is not a Prime Number")
+        return False
+    for i in range(2,int(num**0.5)+1):
+        if num %i ==0:
+            print("The Entered Value is not a Prime Number")
+            return False
+    return True
+
+# def generate_prime_number(bit_length):
+#     while True:
+#         candidate = random.getrandbits(bit_length)
+#         if check_prime(candidate):
+#             return candidate
+
+def generate_p_q(bits):
+    while True:
+        p= int(input("Enter First prime number: "))
+        q= int(input("Enter Second prime number: "))
+        # p = random.randrange(2**(bits-1), 2**bits-1)
+        # q = random.randrange(2**(bits-1), 2**bits-1)
+    
+        if check_prime(p) and check_prime(q):
+            n=p*q
+            phi=(p-1)*(q-1)
+            e=random.randrange(2, phi)
+            gcd, x, _ = extended_gcd(e, phi)
+            if gcd == 1:
+                d= get_positive_private_exponent(e,phi)
+
+                public_key = (e, n)
+                private_key = (d, n)
+                
+                # return public_key, private_key
+                return n,e,d
+
+def encrypt(message,n,e):
+    return pow (message,e,n)
+
+n,e,d= generate_p_q(8)
+# message=123
+ciphertext= encrypt(message,n,e)
+print(f"Encrypted message: {ciphertext}")
+
+def decrypt(ciphertext,n,d):
+    return pow(ciphertext,d,n)
+
+plaintext= decrypt(ciphertext,n,d)
+print(f"Decrypted message: {plaintext}")
+            
+
+# public_key, private_key = generate_p_q(bits=8)
+# print("Public Key (e, n):", public_key)
+# print("Private Key (d, n):", private_key)
