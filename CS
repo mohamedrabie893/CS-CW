@@ -1,0 +1,12 @@
+def extended_gcd(a,b):
+    X0,X1,Y0,Y1=1,0,0,1
+    while b:
+        q,a,b= a//b,b,a%b
+        X0,X1=X1,X0 - q *X1
+        Y0,Y1=Y1,Y0 - q *Y1
+    return a,X0,Y0 
+e=17
+phi_n=40
+gcd,x,y= extended_gcd(e,phi_n)
+private_exponent= x
+print(f"The private exponent (d) is: {private_exponent}")
