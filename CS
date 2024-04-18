@@ -1,6 +1,5 @@
 import random
-
-message = int(input("Enter a message: "))
+import math 
 
 def extended_gcd(a,b):
     X0,X1,Y0,Y1=1,0,0,1
@@ -10,63 +9,79 @@ def extended_gcd(a,b):
         Y0,Y1=Y1,Y0 - q *Y1
     return a,X0,Y0
 
-def get_positive_private_exponent(e,phi):
+def choose_public_exponent(phi_n):
+    e=random.randrange(2,phi_n)
+    while math.gcd(e,phi_n) !=1:
+        e=random.randrange(2,phi_n)
+    return e 
+
+def get_private_exponent(e,phi):
     gcd,x,y=extended_gcd(e,phi)
     private_exponent= x%phi
     return private_exponent 
 
-def check_prime(num):
+def is_prime(num):
     if num <=1:
-        print("The Entered Value is not a Prime Number")
         return False
     for i in range(2,int(num**0.5)+1):
         if num %i ==0:
-            print("The Entered Value is not a Prime Number")
             return False
     return True
 
-# def generate_prime_number(bit_length):
-#     while True:
-#         candidate = random.getrandbits(bit_length)
-#         if check_prime(candidate):
-#             return candidate
-
-def generate_p_q(bits):
+def check_prime(number):
     while True:
-        p= int(input("Enter First prime number: "))
-        q= int(input("Enter Second prime number: "))
-        # p = random.randrange(2**(bits-1), 2**bits-1)
-        # q = random.randrange(2**(bits-1), 2**bits-1)
-    
-        if check_prime(p) and check_prime(q):
-            n=p*q
-            phi=(p-1)*(q-1)
-            e=random.randrange(2, phi)
-            gcd, x, _ = extended_gcd(e, phi)
-            if gcd == 1:
-                d= get_positive_private_exponent(e,phi)
-
-                public_key = (e, n)
-                private_key = (d, n)
-                
-                # return public_key, private_key
-                return n,e,d
+        prime=int(input(number))
+        if is_prime(prime):
+            return prime 
+        else:
+            print("Please enter a prime number.")
 
 def encrypt(message,n,e):
+    if message >= n:
+        raise ValueError("Make sure that the message is less than or equal to N")
     return pow (message,e,n)
-
-n,e,d= generate_p_q(8)
-# message=123
-ciphertext= encrypt(message,n,e)
-print(f"Encrypted message: {ciphertext}")
 
 def decrypt(ciphertext,n,d):
     return pow(ciphertext,d,n)
 
-plaintext= decrypt(ciphertext,n,d)
-print(f"Decrypted message: {plaintext}")
-            
+def generate_p_q(p,q):
+    n = p*q
+    phi =(p-1)*(q-1) 
+    e= choose_public_exponent(phi)
+    d= get_private_exponent(e,phi)
+    public_key =(e,n)
+    private_key= (d,n)
+    return public_key,private_key, n        
 
-# public_key, private_key = generate_p_q(bits=8)
-# print("Public Key (e, n):", public_key)
-# print("Private Key (d, n):", private_key)
+size= int(input("Choose 8 or 16 bits.")) 
+if size not in [8,16]:
+    raise ValueError("Choose 8 or 16 bits only!")
+p= check_prime("Enter a prime number: ")
+q= check_prime("Enter a prime number: ")
+public_key, private_key, n= generate_p_q(p,q)
+if n >=255 and size==8:
+    print("The size of n should be 8 bits.")
+    raise ValueError ("n isn't 8 bits")
+elif n> 65536 and size ==16:
+    print("The size of n should be 16 bits.")
+    raise ValueError("n isn't 16 bits.")
+print("Public key(e,n): ", public_key)
+print("Private key(d,n): ", private_key)
+message= int(input("Enter a message: "))
+ciphertext= encrypt(message,public_key[1],public_key[0])
+print(f"Encrypted message: {ciphertext}")
+plaintext=decrypt(ciphertext,private_key[1],private_key[0])
+print(f"decrypted message: {plaintext}")
+
+
+def brute_force(n,e,ciphertext):
+    for d in range(2,n):
+        if pow(ciphertext,d,n) == ciphertext:
+            return d
+    return None
+n= private_key[1]
+e= public_key[0]
+found_d= brute_force(n,e,ciphertext)
+print("Found private exponent (d): ",found_d)
+
+
