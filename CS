@@ -1,5 +1,6 @@
 import random
 import math 
+import time
 
 def extended_gcd(a,b):
     X0,X1,Y0,Y1=1,0,0,1
@@ -48,7 +49,11 @@ def generate_p_q(p,q):
     n = p*q
     phi =(p-1)*(q-1) 
     e= choose_public_exponent(phi)
+    factorize_start=time.perf_counter()
     d= get_private_exponent(e,phi)
+    factorize_end=time.perf_counter()
+    factorize_time= factorize_end-factorize_start
+    print(f"The time taken for the factorization function is {factorize_time} seconds")
     public_key =(e,n)
     private_key= (d,n)
     return public_key,private_key, n        
@@ -81,7 +86,10 @@ def brute_force(n,e,ciphertext):
     return None
 n= private_key[1]
 e= public_key[0]
+brute_start = time.perf_counter()
 found_d= brute_force(n,e,ciphertext)
+brute_end= time.perf_counter()
 print("Found private exponent (d): ",found_d)
-
+brute_time= brute_end-brute_start
+print(f"The time taken for the brute force function is {brute_time}")
 
