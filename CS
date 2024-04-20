@@ -79,17 +79,25 @@ plaintext=decrypt(ciphertext,private_key[1],private_key[0])
 print(f"decrypted message: {plaintext}")
 
 
-def brute_force(n,e,ciphertext):
-    for d in range(2,n):
-        if pow(ciphertext,d,n) == ciphertext:
-            return d
-    return None
-n= private_key[1]
-e= public_key[0]
-brute_start = time.perf_counter()
-found_d= brute_force(n,e,ciphertext)
-brute_end= time.perf_counter()
-print("Found private exponent (d): ",found_d)
-brute_time= brute_end-brute_start
-print(f"The time taken for the brute force function is {brute_time}")
+def modinv(a,m):
+    g,x,y= extended_gcd(a,m)
+    if g!=1:
+        raise ValueError("modular inverse does not exist")
+    else:
+        return x%m
 
+def factor(n):
+    for i in range(3,n):
+        if n%i==0:
+            return i
+        
+def brute_force():
+    e= public_key[0]
+    n= private_key[1]
+    p= factor(n)
+    q= n//p
+    phi_n= (p-1)*(q-1)
+    d_crack=modinv(e,phi_n)
+    return d_crack
+
+print("Cracked d: ", brute_force())
