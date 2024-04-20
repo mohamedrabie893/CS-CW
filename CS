@@ -99,5 +99,8 @@ def brute_force():
     phi_n= (p-1)*(q-1)
     d_crack=modinv(e,phi_n)
     return d_crack
-
+brute_start= time.perf_counter()
 print("Cracked d: ", brute_force())
+brute_end= time.perf_counter()
+brute_time= brute_end-brute_start
+print(f"The time taken for brute force function is {brute_time} seconds")
